@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { RepairRequest, User, StatusLabels, StatusColors, PriorityLabels, PriorityColors } from '../types';
 import RepairFormModal from './RepairFormModal';
+import PrintView from './PrintView';
 
 interface UserDashboardProps {
   user: User;
@@ -12,11 +13,21 @@ interface UserDashboardProps {
 
 const UserDashboard: React.FC<UserDashboardProps> = ({ user, requests, onCreateRequest, onUpdateStatus }) => {
   const [showForm, setShowForm] = useState(false);
+  const [printTicket, setPrintTicket] = useState<RepairRequest | null>(null);
   const userRequests = requests.filter(r => r.requester.username === user.username);
+
+  const handlePrint = (ticket: RepairRequest) => {
+    setPrintTicket(ticket);
+    // รอให้คอมโพเนนต์ PrintView เรนเดอร์ก่อนสั่งพิมพ์
+    setTimeout(() => {
+      window.print();
+      setPrintTicket(null);
+    }, 300);
+  };
 
   return (
     <div className="space-y-8 animate-fade-in">
-      <div className="bg-white rounded-[2.5rem] p-12 flex flex-col md:flex-row items-center justify-between gap-8 shadow-sm border border-gray-100">
+      <div className="bg-white rounded-[2.5rem] p-12 flex flex-col md:flex-row items-center justify-between gap-8 shadow-sm border border-gray-100 no-print">
         <div className="text-center md:text-left">
           <h2 className="text-4xl font-black text-gray-800 mb-2">สวัสดีคุณ {user.name} 🛠️</h2>
           <p className="text-gray-500 text-lg">หากครุภัณฑ์ชำรุด สามารถแจ้งซ่อมได้ทันทีผ่านระบบออนไลน์</p>
@@ -27,7 +38,7 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ user, requests, onCreateR
         </button>
       </div>
 
-      <div className="soft-card overflow-hidden">
+      <div className="soft-card overflow-hidden no-print">
         <div className="p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
           <h3 className="text-xl font-black text-gray-800">ประวัติการแจ้งซ่อมของท่าน</h3>
         </div>
@@ -39,11 +50,12 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ user, requests, onCreateR
                 <th className="px-8 py-5">ความเร่งด่วน</th>
                 <th className="px-8 py-5">ครุภัณฑ์</th>
                 <th className="px-8 py-5">สถานะ</th>
+                <th className="px-8 py-5 text-center">พิมพ์</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {userRequests.length === 0 ? (
-                <tr><td colSpan={4} className="px-8 py-20 text-center text-gray-400 italic font-bold">ยังไม่มีข้อมูลการแจ้งซ่อม</td></tr>
+                <tr><td colSpan={5} className="px-8 py-20 text-center text-gray-400 italic font-bold">ยังไม่มีข้อมูลการแจ้งซ่อม</td></tr>
               ) : (
                 userRequests.map(req => (
                   <tr key={req.id} className="hover:bg-purple-50/30 transition-all">
@@ -59,6 +71,17 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ user, requests, onCreateR
                         {StatusLabels[req.status]}
                       </span>
                     </td>
+                    <td className="px-8 py-6 text-center">
+                      <button 
+                        onClick={() => handlePrint(req)}
+                        className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+                        title="พิมพ์ใบแจ้งซ่อม"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                        </svg>
+                      </button>
+                    </td>
                   </tr>
                 ))
               )}
@@ -70,6 +93,9 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ user, requests, onCreateR
       {showForm && (
         <RepairFormModal user={user} onClose={() => setShowForm(false)} onSubmit={(req) => { onCreateRequest(req); setShowForm(false); }} />
       )}
+
+      {/* ซ่อนไว้สำหรับการพิมพ์เท่านั้น */}
+      {printTicket && <PrintView request={printTicket} />}
     </div>
   );
 };
