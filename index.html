@@ -116,9 +116,26 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
         }
 
+        @page {
+            size: A4;
+            margin: 20mm;
+        }
+
         @media print {
+            body {
+                background-color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
             .no-print { display: none !important; }
-            .print-only { display: block !important; }
+            .print-only { 
+                display: block !important; 
+                width: 210mm;
+                height: 297mm;
+                margin: 0 auto;
+                background-color: white !important;
+            }
+            #root { display: none !important; }
         }
         .print-only { display: none; }
     </style>
