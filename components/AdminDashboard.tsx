@@ -96,9 +96,20 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ requests, onUpdateStatu
     document.body.removeChild(link);
   };
 
+  const updateStaffAction = (field: string, value: string) => {
+    if (!selectedTicket) return;
+    setSelectedTicket({
+      ...selectedTicket,
+      staffAction: {
+        ...(selectedTicket.staffAction || {}),
+        [field]: value
+      }
+    });
+  };
+
   return (
     <div className="space-y-10 animate-fade-in">
-      {/* Overview Cards Grid - Based on attachment style */}
+      {/* Overview Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 no-print">
         {cards.map((card, idx) => (
           <div key={idx} className={`${card.color} text-white p-8 category-card flex items-center justify-between shadow-lg`}>
@@ -182,26 +193,171 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ requests, onUpdateStatu
         </div>
       </div>
 
-      {/* Ticket Management Modal */}
+      {/* Enhanced Ticket Management Modal */}
       {selectedTicket && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
-          <div className="bg-white rounded-[2rem] shadow-2xl max-w-2xl w-full p-10">
-            <h2 className="text-2xl font-black mb-8 border-b pb-4">📝 จัดการ Ticket: {selectedTicket.id}</h2>
-            <div className="grid grid-cols-2 gap-6 mb-8">
+          <div className="bg-white rounded-[2.5rem] shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="p-8 border-b sticky top-0 bg-white z-10 flex justify-between items-center">
               <div>
-                <label className="text-xs font-black text-gray-400 uppercase mb-2 block">อัปเดตสถานะ</label>
-                <select className="w-full p-4 bg-gray-50 rounded-2xl font-bold border-none" value={selectedTicket.status} onChange={e => setSelectedTicket({...selectedTicket, status: e.target.value as RepairStatus})}>
-                   {Object.entries(StatusLabels).map(([k,v]) => <option key={k} value={k}>{v}</option>)}
-                </select>
+                <h2 className="text-2xl font-black text-gray-800">🛠️ จัดการ Ticket: <span className="text-purple-600">{selectedTicket.id}</span></h2>
+                <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">วันที่แจ้ง: {new Date(selectedTicket.createdAt).toLocaleString('th-TH')}</p>
               </div>
-              <div>
-                <label className="text-xs font-black text-gray-400 uppercase mb-2 block">ค่าใช้จ่ายประมาณการ</label>
-                <input type="number" className="w-full p-4 bg-gray-50 rounded-2xl font-bold border-none" value={selectedTicket.cost || ''} onChange={e => setSelectedTicket({...selectedTicket, cost: parseInt(e.target.value)})} />
+              <button onClick={() => setSelectedTicket(null)} className="p-2 hover:bg-gray-100 rounded-full transition-all">
+                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
+            </div>
+
+            <div className="p-8 space-y-10">
+              {/* Section 1: Requester & Asset Details */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div className="space-y-4">
+                  <h3 className="text-sm font-black text-purple-600 uppercase tracking-widest border-l-4 border-purple-600 pl-3">👤 ข้อมูลผู้แจ้ง</h3>
+                  <div className="bg-gray-50 rounded-2xl p-6 space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-xs text-gray-400 font-bold">ชื่อ-นามสกุล:</span>
+                      <span className="text-sm font-black text-gray-800">{selectedTicket.requester.name}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-xs text-gray-400 font-bold">ตำแหน่ง:</span>
+                      <span className="text-sm font-bold text-gray-700">{selectedTicket.requester.position}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-xs text-gray-400 font-bold">หน่วยงาน:</span>
+                      <span className="text-sm font-bold text-gray-700">{selectedTicket.requester.department}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-xs text-gray-400 font-bold">เบอร์โทร:</span>
+                      <span className="text-sm font-bold text-blue-600">{selectedTicket.requester.phone}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="text-sm font-black text-orange-600 uppercase tracking-widest border-l-4 border-orange-600 pl-3">📦 ข้อมูลครุภัณฑ์</h3>
+                  <div className="bg-gray-50 rounded-2xl p-6 space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-xs text-gray-400 font-bold">ประเภท:</span>
+                      <span className="text-sm font-black text-gray-800">{selectedTicket.asset.type}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-xs text-gray-400 font-bold">หมายเลขครุภัณฑ์:</span>
+                      <span className="text-sm font-bold text-gray-700">{selectedTicket.asset.id_number || '-'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-xs text-gray-400 font-bold">ห้อง/สถานที่:</span>
+                      <span className="text-sm font-bold text-gray-700">{selectedTicket.asset.room || '-'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-xs text-gray-400 font-bold">ความเร่งด่วน:</span>
+                      <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black uppercase ${PriorityColors[selectedTicket.priority]}`}>
+                        {PriorityLabels[selectedTicket.priority]}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 2: Symptoms */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-black text-red-600 uppercase tracking-widest border-l-4 border-red-600 pl-3">⚠️ รายละเอียด/อาการที่แจ้ง</h3>
+                <div className="bg-red-50/50 border border-red-100 rounded-2xl p-6">
+                  <p className="text-sm text-gray-700 leading-relaxed italic">{selectedTicket.symptoms}</p>
+                </div>
+              </div>
+
+              {/* Section 3: Staff Actions & Status Update */}
+              <div className="space-y-6 pt-6 border-t">
+                <h3 className="text-sm font-black text-blue-600 uppercase tracking-widest border-l-4 border-blue-600 pl-3">📝 การดำเนินการของเจ้าหน้าที่</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="text-[10px] font-black text-gray-400 uppercase mb-2 block ml-1">สถานะปัจจุบัน</label>
+                    <select 
+                      className="w-full p-4 bg-gray-50 rounded-2xl font-bold border-none focus:ring-2 focus:ring-blue-500/20" 
+                      value={selectedTicket.status} 
+                      onChange={e => setSelectedTicket({...selectedTicket, status: e.target.value as RepairStatus})}
+                    >
+                      {Object.entries(StatusLabels).map(([k,v]) => <option key={k} value={k}>{v}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black text-gray-400 uppercase mb-2 block ml-1">ค่าใช้จ่าย (บาท)</label>
+                    <input 
+                      type="number" 
+                      className="w-full p-4 bg-gray-50 rounded-2xl font-bold border-none focus:ring-2 focus:ring-blue-500/20" 
+                      value={selectedTicket.cost || ''} 
+                      onChange={e => setSelectedTicket({...selectedTicket, cost: parseInt(e.target.value) || 0})}
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <label className="text-[10px] font-black text-gray-400 uppercase mb-2 block ml-1">ร้าน/บริษัทที่ติดต่อ</label>
+                    <input 
+                      type="text" 
+                      className="w-full p-4 bg-gray-50 rounded-2xl font-bold border-none" 
+                      value={selectedTicket.staffAction?.vendorName || ''} 
+                      onChange={e => updateStaffAction('vendorName', e.target.value)}
+                      placeholder="ชื่อร้านซ่อม"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black text-gray-400 uppercase mb-2 block ml-1">วันที่แจ้งร้าน</label>
+                    <input 
+                      type="date" 
+                      className="w-full p-4 bg-gray-50 rounded-2xl font-bold border-none" 
+                      value={selectedTicket.staffAction?.contactDate || ''} 
+                      onChange={e => updateStaffAction('contactDate', e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black text-gray-400 uppercase mb-2 block ml-1">วันที่เข้าบริการ</label>
+                    <input 
+                      type="date" 
+                      className="w-full p-4 bg-gray-50 rounded-2xl font-bold border-none" 
+                      value={selectedTicket.staffAction?.serviceDate || ''} 
+                      onChange={e => updateStaffAction('serviceDate', e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-black text-gray-400 uppercase mb-2 block ml-1">บันทึกเพิ่มเติม/หมายเหตุ</label>
+                  <textarea 
+                    rows={3}
+                    className="w-full p-4 bg-gray-50 rounded-2xl font-bold border-none" 
+                    value={selectedTicket.staffAction?.notes || ''} 
+                    onChange={e => updateStaffAction('notes', e.target.value)}
+                    placeholder="ระบุการนำเครื่องออก หรือการแก้ไขเบื้องต้น..."
+                  />
+                </div>
               </div>
             </div>
-            <div className="flex gap-4">
-              <button onClick={() => setSelectedTicket(null)} className="flex-1 py-4 bg-gray-100 rounded-2xl font-bold">ปิดหน้าต่าง</button>
-              <button onClick={() => { onUpdateStatus(selectedTicket.id, selectedTicket); setSelectedTicket(null); }} className="flex-1 py-4 btn-primary text-white rounded-2xl font-black">บันทึกข้อมูล</button>
+
+            {/* Modal Footer */}
+            <div className="p-8 border-t bg-gray-50/50 sticky bottom-0 flex gap-4">
+              <button 
+                onClick={() => setSelectedTicket(null)} 
+                className="flex-1 py-4 bg-white border border-gray-200 rounded-2xl font-bold hover:bg-gray-100 transition-all"
+              >
+                ยกเลิก
+              </button>
+              <button 
+                onClick={() => handlePrint(selectedTicket)} 
+                className="flex-1 py-4 bg-orange-50 text-orange-600 border border-orange-200 rounded-2xl font-black hover:bg-orange-100 transition-all flex items-center justify-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                พิมพ์ PDF
+              </button>
+              <button 
+                onClick={() => { onUpdateStatus(selectedTicket.id, selectedTicket); setSelectedTicket(null); }} 
+                className="flex-[1.5] py-4 btn-primary text-white rounded-2xl font-black shadow-lg transform active:scale-95 transition-all"
+              >
+                บันทึกการดำเนินการ
+              </button>
             </div>
           </div>
         </div>
