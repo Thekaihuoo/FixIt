@@ -105,19 +105,74 @@ const App: React.FC = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
-        <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl p-10 border-t-8 border-purple-600">
-          <div className="text-center mb-10">
-            <img src={LOGO_URL} alt="Logo" className="h-20 mx-auto mb-4 p-2 bg-gray-50 rounded-2xl" />
-            <h1 className="text-3xl font-black text-gray-800">FixIt Login</h1>
-            <p className="text-sm text-gray-400 font-bold uppercase tracking-widest mt-1">Repair System</p>
+      <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-[#5c2d91]">
+        {/* Animated Colorful Background Orbs */}
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-500 rounded-full blur-[120px] opacity-40 animate-pulse"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-orange-500 rounded-full blur-[120px] opacity-30 animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] bg-blue-500 rounded-full blur-[100px] opacity-20"></div>
+
+        <div className="max-w-md w-full relative z-10 px-6">
+          <div className="bg-white/90 backdrop-blur-2xl rounded-[3rem] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] p-10 border border-white/20 transform transition-all hover:scale-[1.01]">
+            <div className="text-center mb-10">
+              <div className="inline-block p-4 bg-white rounded-3xl shadow-xl mb-6 ring-4 ring-purple-50">
+                <img src={LOGO_URL} alt="Logo" className="h-16 mx-auto" />
+              </div>
+              <h1 className="text-4xl font-black text-gray-800 tracking-tight">FixIt</h1>
+              <div className="flex items-center justify-center gap-2 mt-2">
+                <div className="h-1 w-8 bg-purple-600 rounded-full"></div>
+                <p className="text-xs text-gray-400 font-black uppercase tracking-[0.2em]">Repair System</p>
+                <div className="h-1 w-8 bg-orange-500 rounded-full"></div>
+              </div>
+            </div>
+            
+            <form onSubmit={handleLogin} className="space-y-5">
+              <div className="relative group">
+                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-purple-600 transition-colors">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                </span>
+                <input 
+                  type="text" 
+                  placeholder="Username" 
+                  className="w-full pl-14 pr-6 py-5 bg-gray-50 border-2 border-transparent focus:border-purple-200 focus:bg-white rounded-2xl font-bold text-gray-700 transition-all outline-none" 
+                  value={authForm.username} 
+                  onChange={e => setAuthForm({...authForm, username: e.target.value})} 
+                  required 
+                />
+              </div>
+              
+              <div className="relative group">
+                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-purple-600 transition-colors">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002-2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                </span>
+                <input 
+                  type="password" 
+                  placeholder="Password" 
+                  className="w-full pl-14 pr-6 py-5 bg-gray-50 border-2 border-transparent focus:border-purple-200 focus:bg-white rounded-2xl font-bold text-gray-700 transition-all outline-none" 
+                  value={authForm.password} 
+                  onChange={e => setAuthForm({...authForm, password: e.target.value})} 
+                  required 
+                />
+              </div>
+
+              {loginError && (
+                <div className="bg-red-50 text-red-500 text-xs font-black text-center py-3 rounded-xl border border-red-100 animate-shake">
+                  {loginError}
+                </div>
+              )}
+              
+              <button 
+                type="submit" 
+                className="w-full py-5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-[1.5rem] font-black text-lg shadow-[0_10px_20px_-5px_rgba(92,45,145,0.4)] hover:shadow-[0_15px_25px_-5px_rgba(92,45,145,0.5)] hover:-translate-y-1 transition-all active:scale-95 flex items-center justify-center gap-3 mt-4"
+              >
+                เข้าสู่ระบบ
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+              </button>
+            </form>
+
+            <div className="mt-8 text-center">
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">FixIt Online Maintenance System v1.2</p>
+            </div>
           </div>
-          <form onSubmit={handleLogin} className="space-y-6">
-            <input type="text" placeholder="Username" className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl font-bold" value={authForm.username} onChange={e => setAuthForm({...authForm, username: e.target.value})} required />
-            <input type="password" placeholder="Password" className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl font-bold" value={authForm.password} onChange={e => setAuthForm({...authForm, password: e.target.value})} required />
-            {loginError && <div className="text-red-500 text-sm font-bold text-center">{loginError}</div>}
-            <button type="submit" className="w-full py-4 bg-purple-600 text-white rounded-2xl font-black text-lg shadow-lg hover:bg-purple-700 transition-all">เข้าสู่ระบบ</button>
-          </form>
         </div>
       </div>
     );
