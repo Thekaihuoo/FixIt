@@ -1,0 +1,17 @@
+
+{
+  "name": "FixIt: ระบบแจ้งซ่อมครุภัณฑ์",
+  "short_name": "FixIt",
+  "description": "ระบบแจ้งซ่อมครุภัณฑ์ออนไลน์สำหรับสถานศึกษา",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ff6f00",
+  "icons": [
+    {
+      "src": "https://img5.pic.in.th/file/secure-sv1/-668e94e3b2fda05e3.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
